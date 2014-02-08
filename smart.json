@@ -1,0 +1,9 @@
+{
+  "name": "phonegap-oauth",
+  "description": "OAuth for Meteor & PhoneGap ",
+  "homepage": "https://github.com/AdamBrodzinski/meteor-phonegap-oauth",
+  "author": "Adam Brodzinski (http://blonk.co)",
+  "version": "0.1.0",
+  "git": "https://github.com/AdamBrodzinski/meteor-phonegap-oauth.git"
+}
+
