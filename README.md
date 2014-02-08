@@ -16,10 +16,9 @@ https://atmosphere.meteor.com/package/phonegap-oauth
 
 ### Setup
 
-- Install PhoneGap (i'm using the cordova npm commmand line).
-- Install InAppBrowser into your phonegap app
-- Configure Meteor with PhoneGap using Meteor-Rider
-(boilerplate based off of [blonk](http://blonk.co) coming in a few weeks)
+- [Install PhoneGap](http://docs.phonegap.com/en/3.3.0/guide_cli_index.md.html#The%20Command-Line%20Interface) (i'm using the cordova npm commmand line).
+- [Install InAppBrowser](http://docs.phonegap.com/en/3.3.0/cordova_inappbrowser_inappbrowser.md.html#InAppBrowser) into your phonegap app
+- Configure Meteor with PhoneGap (I'm using [Meteor-Rider](https://github.com/zeroasterisk/MeteorRider))... boilerplate based off of [blonk](http://blonk.co) coming in a few weeks
 
 
 ### Installation
