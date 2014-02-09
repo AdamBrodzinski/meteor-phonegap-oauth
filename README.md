@@ -9,7 +9,7 @@ OAuth popup into this child browser.
 The patch basically listens for the pagestop event and analyzes the uri to determine what action to take (if any). This includes manually closing the InAppBrowser to satisfy Meteor's checks.
 
 This has been tested with Meteor 0.7, Cordova 3.3 and the Meteor-Rider hijacking method.  
-You can view the OAuth working by searching for blonk on the App Store or Google Play Store.
+You can view demo of this working by searching for blonk on the App Store or Google Play Store.
 
 
 
