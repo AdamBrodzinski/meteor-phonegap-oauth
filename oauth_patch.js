@@ -18,9 +18,10 @@ IAB = {
     var self = this;
 
     cordova.exec(function(params) {
+      console.log('PARAMS', params);
+
       if (params.type === 'loadstop') {
-        console.debug('loadstart:', params.url);
-        //check goal url agains params.url without anything after the path
+        console.debug('loadstop:', params.url);
 
         // uri contains an error param, manually close window
         if (params.url && params.url.match(/error/)) {
@@ -28,7 +29,16 @@ IAB = {
         }
 
         // uri contains client code, close so meteor can login
-        if (params.url && params.url.match(/close&code/)) {
+        if (params.url && params.url.match(/close=/)) {
+          self.close();
+        }
+      }
+
+      if (params.type === 'loadstop' || params.type === 'loadstart') {
+        console.debug('load:', params.url);
+
+        // uri contains an error param, manually close window
+        if (params.url && params.url.match(/error/)) {
           self.close();
         }
       }
