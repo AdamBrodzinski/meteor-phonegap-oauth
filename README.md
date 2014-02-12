@@ -28,5 +28,6 @@ You can view demo of this working by searching for blonk on the App Store or Goo
 - Enter email/password and click authorize
 - Meteor should now be logged in
 
+**note, the Android InAppBrowser seems to be blocking the script in this package until manually closing the window, working on a workaround for Android**
 
 Special thanks to [Zoltan](https://github.com/zol) for the inspiration on this from Meteor-Talk!
