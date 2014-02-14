@@ -8,9 +8,7 @@ OAuth popup into this child browser.
 
 The patch basically listens for the pagestop event and analyzes the uri to determine what action to take (if any). This includes manually closing the InAppBrowser to satisfy Meteor's checks.
 
-This has been tested with Meteor 0.7, Cordova 3.3 and the Meteor-Rider hijacking method.  
-You can view demo of this working by searching for blonk on the App Store or Google Play Store.
-
+This has been tested with Meteor 0.7, accounts-linkedin, Cordova 3.3 and the Meteor-Rider hijacking method.  
 
 
 ### Setup
@@ -27,7 +25,5 @@ You can view demo of this working by searching for blonk on the App Store or Goo
 - Click the log in with [FaceBook/LinkedIn/etc...]
 - Enter email/password and click authorize
 - Meteor should now be logged in
-
-**note, the Android InAppBrowser seems to be blocking the script in this package until manually closing the window, working on a workaround for Android**
 
 Special thanks to [Zoltan](https://github.com/zol) for the inspiration on this from Meteor-Talk!
