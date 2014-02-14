@@ -1,64 +1,69 @@
 // Meteor's OAuth flow currently only works with popups. Phonegap does
 // not handle this well. Using the InAppBrowser plugin we can load the
-// OAuth popup into this child browser. Using the plugin by itself would
-// not work with the MeteorRider phonegap method, this fixes it. This
-// has not been tested on other Meteor phonegap methods. (tested on 3.3)
+// OAuth popup into it. Using the plugin by itself would not work with
+// the MeteorRider phonegap method, this fixes it. This has not been
+// tested on other Meteor phonegap methods. (tested on PG 3.3, android,iOS)
 //
 // http://docs.phonegap.com/en/3.3.0/cordova_inappbrowser_inappbrowser.md.html
 // https://github.com/zeroasterisk/MeteorRider
 
-/*global IAB:true, cordova */
+var __open = window.open,
+    IAB,
+    oauthWin,
+    timer;
 
-
-// API for InAppBrowser
+// Create an object to return from a monkeypatched window.open call. Handles
+// open/closed state of popup to keep Meteor happy. Allows one to save window
+// referrence to a variable and close it later. e.g.,
+// `var foo = window.open('url');  foo.close();
+//
 IAB = {
-  closed: true, //for meteor to detect closed state
+  closed: true,
 
   open: function(url) {
     var self = this;
 
-    cordova.exec(function(params) {
+    // TODO add options param and append to current options
+    oauthWin = __open(url, '_blank', 'location=no,hidden=yes');
 
-      console.log('[IAB] params:', params);
-      console.log('[IAB event]:', params.type);
+    oauthWin.addEventListener('loadstop', checkIfOauthIsDone);
 
-      if (params.type === 'loadstop') {
-        console.debug('loadstop:', params.url);
+    // use hidden=yes as a hack for Android, allows popup to  yield events with
+    // each #show call. Lets events run on Meteor app, otherwise all listeners
+    // will *only* run when tapping done button or oauthWin.close
+    //
+    // FIXME should be a better way to do this...
+    if (device.platform === 'Android') {
+      timer = setInterval(oauthWin.show, 200);
+    } else {
+      oauthWin.show();
+    }
 
-        // uri contains an error or code param, manually close window
-        if (params.url && params.url.match(/error|code=/)) {
-          self.close();
-        }
-      }
+    // check if uri contains an error or code param, then manually close popup
+    function checkIfOauthIsDone(event) {
+      if (!event.url || !event.url.match(/error|code=/)) return;
 
-    // exec error
-    }, function(err) {
-      console.error('In App Browser error', err);
-    }, "InAppBrowser", "open", [url, '_blank', 'location=no']);
+      clearInterval(timer);
+      oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
+      self.close();
+    }
 
     this.closed = false;
   },
 
-  // close InAppBrowser
   close: function() {
-    cordova.exec(function() {
-    }, function(err) {
-      console.error(err);
-    }, "InAppBrowser", "close", []);
-
+    if (!oauthWin) return;
+    oauthWin.close();
     this.closed = true;
   }
 };
-
-
-if (typeof device !== "undefined") { // if phonegap device
   
+// monkeypatch window.open on the phonegap platform
+if (typeof device !== "undefined") {
   window.open = function(url) {
     IAB.open(url);
     // return InAppBrowser so you can set foo = open(...) and then foo.close()
     return IAB;
   };
-
-  window.closed = IAB.closed;
 }
 
