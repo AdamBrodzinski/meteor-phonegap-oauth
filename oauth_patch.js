@@ -8,7 +8,6 @@
 // https://github.com/zeroasterisk/MeteorRider
 
 var __open = window.open,
-    IAB,
     oauthWin,
     timer;
 
@@ -17,7 +16,7 @@ var __open = window.open,
 // referrence to a variable and close it later. e.g.,
 // `var foo = window.open('url');  foo.close();
 //
-IAB = {
+window.IAB = {
   closed: true,
 
   open: function(url) {
@@ -57,7 +56,7 @@ IAB = {
     this.closed = true;
   }
 };
-  
+
 // monkeypatch window.open on the phonegap platform
 if (typeof device !== "undefined") {
   window.open = function(url) {
