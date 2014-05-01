@@ -40,11 +40,32 @@ window.IAB = {
 
     // check if uri contains an error or code param, then manually close popup
     function checkIfOauthIsDone(event) {
-      if (!event.url || !event.url.match(/error|code=/)) return;
+		console.log('CHECK IF OAUTH IS DONE URL', event.url);
+        if (!event.url || !event.url.match(/close|error|code=/)) return;
 
-      clearInterval(timer);
-      oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
-      self.close();
+		oauthWin.executeScript({code: 'document.querySelector("script").innerHTML'}, function(res) {
+			
+			var js = res[0].replace('window.close()', '').replace('window.opener && window.opener.', '');
+			console.log('JS', js);
+			
+			//js = something like: 
+			//Package.oauth.OAuth._handleCredentialSecret("RiU_bla_bla_9qQ2", "BtK_bla_bla_4Q"); 
+			//the first parameter is the "credentialToken" and the second the "credentialSecret"
+			eval(js);
+			
+			//now code similar to this is what would usually be called after the popup closes
+			var credentialToken = js.match(/"(.+)",/)[0].replace(/"/g, '').replace(/,/, '');
+			Accounts.oauth.tryLoginAfterPopupClosed(credentialToken)
+			//TO DO: preserve callback to Meteor.loginWithTWitter(options, callback)
+			//FOR NOW: use Deps.autorun(function() {if(Meteor.user()) //do something});
+			
+			oauthWin.close();
+		});
+
+		console.log('DONE FIRED');
+		
+        clearInterval(timer);
+        oauthWin.removeEventListener('loadstop', checkIfOauthIsDone)
     }
 
     this.closed = false;
