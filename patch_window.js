@@ -8,10 +8,11 @@
 // https://github.com/zeroasterisk/MeteorRider
 window.patchWindow = function () {
 
-    // Check if the InAppBrowser is loaded.
+    // Make sure the InAppBrowser is loaded before patching the window.
     var inAppBrowserLoaded = !!(window.cordova && window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser'));
     if (!inAppBrowserLoaded) return false;
 
+    // Keep a reference to the in app browser's window.open.
     var __open = window.open,
         oauthWin,
         timer;
@@ -20,12 +21,11 @@ window.patchWindow = function () {
     // open/closed state of popup to keep Meteor happy. Allows one to save window
     // reference to a variable and close it later. e.g.,
     // `var foo = window.open('url');  foo.close();
-    //
     window.IAB = {
         closed: true,
 
         open: function (url) {
-            // TODO add options param and append to current options
+            // XXX add options param and append to current options
             oauthWin = __open(url, '_blank', 'location=no,hidden=yes');
 
             oauthWin.addEventListener('loadstop', checkIfOauthIsDone);
@@ -34,7 +34,7 @@ window.patchWindow = function () {
             // each #show call. Lets events run on Meteor app, otherwise all listeners
             // will *only* run when tapping done button or oauthWin.close
             //
-            // FIXME should be a better way to do this...
+            // XXX should be a better way to do this
             if (device.platform === 'Android') {
                 timer = setInterval(oauthWin.show, 200);
             } else {
@@ -43,25 +43,17 @@ window.patchWindow = function () {
 
             // check if uri contains an error or code param, then manually close popup
             function checkIfOauthIsDone(event) {
+                // XXX improve this regex to match twitters as well
                 if (!event.url || !event.url.match(/error|code=/)) return;
 
-                oauthWin.executeScript({code: 'document.querySelector("script").innerHTML'}, function (res) {
+                // Get the credentialToken and credentialSecret from the InAppBrowser's url hash.
+                var hashes = event.url.slice(event.url.indexOf('#') + 1).split('&');
+                var credentialToken = hashes[0].split('=')[1];
+                var credentialSecret = hashes[1].split('=')[1];
 
-                    var js = res[0].replace('window.close()', '').replace('window.opener && window.opener.', '');
-
-                    //js = something like:
-                    //Package.oauth.OAuth._handleCredentialSecret("RiU_bla_bla_9qQ2", "BtK_bla_bla_4Q");
-                    //the first parameter is the "credentialToken" and the second the "credentialSecret"
-                    eval(js);
-
-                    //now code similar to this is what would usually be called after the popup closes
-                    var credentialToken = js.match(/"(.+)",/)[0].replace(/"/g, '').replace(/,/, '');
-                    Accounts.oauth.tryLoginAfterPopupClosed(credentialToken)
-                    //TO DO: preserve callback to Meteor.loginWithTwitter(options, callback)
-                    //FOR NOW: use Deps.autorun(function() {if(Meteor.user()) //do something});
-
-                    oauthWin.close();
-                });
+                Package.oauth.OAuth._handleCredentialSecret(credentialToken, credentialSecret);
+                Accounts.oauth.tryLoginAfterPopupClosed(credentialToken);
+                oauthWin.close();
 
                 clearInterval(timer);
                 oauthWin.removeEventListener('loadstop', checkIfOauthIsDone)
@@ -86,12 +78,13 @@ window.patchWindow = function () {
         };
     }
 
-    // Clear patchWindow to prevent it from being called again.
+    // Clear patchWindow to prevent it from being called multiple times.
     window.patchWindow = function () {
     };
 
     return true;
 };
 
-// If the InAppBrowser is not loaded yet wait until cordova is finished loading.
+// Patch the window after cordova is finished loading
+// if the InAppBrowser is not available yet.
 if (!window.patchWindow()) document.addEventListener('deviceready', window.patchWindow, false);
