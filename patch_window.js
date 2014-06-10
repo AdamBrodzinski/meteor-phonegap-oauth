@@ -14,8 +14,7 @@ window.patchWindow = function () {
 
     // Keep a reference to the in app browser's window.open.
     var __open = window.open,
-        oauthWin,
-        timer;
+        oauthWin;
 
     // Create an object to return from a monkeypatched window.open call. Handles
     // open/closed state of popup to keep Meteor happy. Allows one to save window
@@ -30,33 +29,31 @@ window.patchWindow = function () {
 
             oauthWin.addEventListener('loadstop', checkIfOauthIsDone);
 
-            // use hidden=yes as a hack for Android, allows popup to yield events with
-            // each #show call. Lets events run on Meteor app, otherwise all listeners
-            // will *only* run when tapping done button or oauthWin.close
-            //
-            // XXX should be a better way to do this
-            if (device.platform === 'Android') {
-                timer = setInterval(oauthWin.show, 200);
-            } else {
-                oauthWin.show();
-            }
+            oauthWin.show();
 
             // check if uri contains an error or code param, then manually close popup
             function checkIfOauthIsDone(event) {
-                // XXX improve this regex to match twitters as well
-                if (!event.url || !event.url.match(/error|code=/)) return;
+                // if this is the oauth prompt url, we are not done
+                if (url === event.url) return;
 
-                // Get the credentialToken and credentialSecret from the InAppBrowser's url hash.
-                var hashes = event.url.slice(event.url.indexOf('#') + 1).split('&');
-                var credentialToken = hashes[0].split('=')[1];
-                var credentialSecret = hashes[1].split('=')[1];
+                if (!event.url || !event.url.match(/close|error|code=/)) return;
 
-                OAuth._handleCredentialSecret(credentialToken, credentialSecret);
-                Accounts.oauth.tryLoginAfterPopupClosed(credentialToken);
+                if (event.url.indexOf('credentialToken') > -1) {
+                    // Get the credentialToken and credentialSecret from the InAppBrowser's url hash.
+                    var hashes = event.url.slice(event.url.indexOf('#') + 1).split('&');
+                    var credentialToken = hashes[0].split('=')[1];
+
+                    if (event.url.indexOf('credentialSecret') > -1) {
+                        var credentialSecret = hashes[1].split('=')[1];
+                        OAuth._handleCredentialSecret(credentialToken, credentialSecret);
+                    }
+
+                    Accounts.oauth.tryLoginAfterPopupClosed(credentialToken);
+                }
+
                 oauthWin.close();
 
-                clearInterval(timer);
-                oauthWin.removeEventListener('loadstop', checkIfOauthIsDone)
+                oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
             }
 
             this.closed = false;
@@ -64,8 +61,6 @@ window.patchWindow = function () {
 
         close: function () {
             if (!oauthWin) return;
-
-            clearInterval(timer);
 
             oauthWin.close();
             this.closed = true;
