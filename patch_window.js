@@ -64,6 +64,9 @@ window.patchWindow = function () {
 
         close: function () {
             if (!oauthWin) return;
+
+            clearInterval(timer);
+
             oauthWin.close();
             this.closed = true;
         }
