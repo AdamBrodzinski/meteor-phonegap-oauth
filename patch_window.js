@@ -51,7 +51,7 @@ window.patchWindow = function () {
                 var credentialToken = hashes[0].split('=')[1];
                 var credentialSecret = hashes[1].split('=')[1];
 
-                Package.oauth.OAuth._handleCredentialSecret(credentialToken, credentialSecret);
+                OAuth._handleCredentialSecret(credentialToken, credentialSecret);
                 Accounts.oauth.tryLoginAfterPopupClosed(credentialToken);
                 oauthWin.close();
 
