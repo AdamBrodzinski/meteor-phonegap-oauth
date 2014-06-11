@@ -8,6 +8,9 @@
 // https://github.com/zeroasterisk/MeteorRider
 window.patchWindow = function () {
 
+    // Prevent the window from being patched twice.
+    if (window.IAB) return;
+    
     // Make sure the InAppBrowser is loaded before patching the window.
     var inAppBrowserLoaded = !!(window.cordova && window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser'));
     if (!inAppBrowserLoaded) return false;
@@ -75,10 +78,6 @@ window.patchWindow = function () {
             return IAB;
         };
     }
-
-    // Clear patchWindow to prevent it from being called multiple times.
-    window.patchWindow = function () {
-    };
 
     return true;
 };
