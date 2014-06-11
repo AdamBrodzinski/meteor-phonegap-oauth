@@ -12,9 +12,12 @@ window.patchWindow = function () {
     if (window.IAB) return;
 
     // Make sure the InAppBrowser is loaded before patching the window.
-    var inAppBrowserLoaded = !!(window.cordova && window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser'));
-    if (!inAppBrowserLoaded) return false;
-
+    try {
+        window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser');
+    } catch (e) {
+        return false;
+    }
+    
     // Keep a reference to the in app browser's window.open.
     var __open = window.open,
         oauthWin,
