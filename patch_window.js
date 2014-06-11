@@ -10,14 +10,15 @@ window.patchWindow = function () {
 
     // Prevent the window from being patched twice.
     if (window.IAB) return;
-    
+
     // Make sure the InAppBrowser is loaded before patching the window.
     var inAppBrowserLoaded = !!(window.cordova && window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser'));
     if (!inAppBrowserLoaded) return false;
 
     // Keep a reference to the in app browser's window.open.
     var __open = window.open,
-        oauthWin;
+        oauthWin,
+        timer;
 
     // Create an object to return from a monkeypatched window.open call. Handles
     // open/closed state of popup to keep Meteor happy. Allows one to save window
@@ -32,7 +33,29 @@ window.patchWindow = function () {
 
             oauthWin.addEventListener('loadstop', checkIfOauthIsDone);
 
-            oauthWin.show();
+            // Close the InAppBrowser on exit -- triggered when the
+            // user goes back when there are not pages in the history.
+            oauthWin.addEventListener('exit', close);
+
+            // window.open event listeners do not fire in android
+            // as a work around use hidden=yes and constantly call show
+            // http://stackoverflow.com/q/23352940/230462
+            //
+            // XXX find a better way to do this
+            if (device.platform === 'Android') {
+                timer = setInterval(oauthWin.show, 200);
+            } else {
+                oauthWin.show();
+            }
+
+            function close() {
+                // close the window
+                IAB.close();
+
+                // remove the listeners
+                oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
+                oauthWin.removeEventListener('exit', close);
+            }
 
             // check if uri contains an error or code param, then manually close popup
             function checkIfOauthIsDone(event) {
@@ -54,9 +77,7 @@ window.patchWindow = function () {
                     Accounts.oauth.tryLoginAfterPopupClosed(credentialToken);
                 }
 
-                oauthWin.close();
-
-                oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
+                close();
             }
 
             this.closed = false;
@@ -66,6 +87,10 @@ window.patchWindow = function () {
             if (!oauthWin) return;
 
             oauthWin.close();
+
+            // Clear the timer in IAB.close to prevent the window from reopening.
+            clearInterval(timer);
+
             this.closed = true;
         }
     };
