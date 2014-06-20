@@ -7,7 +7,6 @@
 // http://docs.phonegap.com/en/3.3.0/cordova_inappbrowser_inappbrowser.md.html
 // https://github.com/zeroasterisk/MeteorRider
 window.patchWindow = function () {
-
     // Prevent the window from being patched twice.
     if (window.IAB) return;
 
@@ -17,11 +16,20 @@ window.patchWindow = function () {
     } catch (e) {
         return false;
     }
-    
+
+    // Plugin messages are not called immediately.
+    // Call exec on an interval to force process messages.
+    // http://stackoverflow.com/q/23352940/230462 and
+    // http://stackoverflow.com/a/24319063/230462
+    if (device.platform === 'Android') {
+        setInterval(function () {
+            cordova.exec(null, null, '', '', [])
+        }, 200);
+    }
+
     // Keep a reference to the in app browser's window.open.
     var __open = window.open,
-        oauthWin,
-        timer;
+        oauthWin;
 
     // Create an object to return from a monkeypatched window.open call. Handles
     // open/closed state of popup to keep Meteor happy. Allows one to save window
@@ -40,16 +48,7 @@ window.patchWindow = function () {
             // user goes back when there are not pages in the history.
             oauthWin.addEventListener('exit', close);
 
-            // window.open event listeners do not fire in android
-            // as a work around use hidden=yes and constantly call show
-            // http://stackoverflow.com/q/23352940/230462
-            //
-            // XXX find a better way to do this
-            if (device.platform === 'Android') {
-                timer = setInterval(oauthWin.show, 200);
-            } else {
-                oauthWin.show();
-            }
+            oauthWin.show();
 
             function close() {
                 // close the window
@@ -90,9 +89,6 @@ window.patchWindow = function () {
             if (!oauthWin) return;
 
             oauthWin.close();
-
-            // Clear the timer in IAB.close to prevent the window from reopening.
-            clearInterval(timer);
 
             this.closed = true;
         }
