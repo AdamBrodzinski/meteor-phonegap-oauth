@@ -17,7 +17,8 @@ window.patchWindow = function () {
         return false;
     }
 
-    // Plugin messages are not called immediately.
+    // Plugin messages are not processed on Android until the next
+    // message this prevents the oauthWin event listeners from firing.
     // Call exec on an interval to force process messages.
     // http://stackoverflow.com/q/23352940/230462 and
     // http://stackoverflow.com/a/24319063/230462
