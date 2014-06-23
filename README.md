@@ -16,7 +16,9 @@ This has been tested with Meteor 0.8.2, accounts-linkedin, Cordova 3.5 and the M
 ### Setup
 
 - [Install PhoneGap](http://docs.phonegap.com/en/3.5.0/guide_cli_index.md.html#The%20Command-Line%20Interface) (i'm using the cordova npm commmand line).
-- [Install InAppBrowser](https://github.com/apache/cordova-plugin-inappbrowser/blob/master/doc/index.md) into your phonegap app
+- [Install InAppBrowser](https://github.com/apache/cordova-plugin-inappbrowser/blob/master/doc/index.md) plugin into your phonegap app
+- [Install Device](https://github.com/apache/cordova-plugin-device/blob/master/doc/index.md) plugin into your phonegap app (used to detect Android)
+
 - Configure Meteor with PhoneGap, use [this boilerplate](https://github.com/AdamBrodzinski/meteor-mobile-boilerplate) if you want to get started quickly
 - [Install Metorite](https://npmjs.org/package/meteorite) if needed
 
