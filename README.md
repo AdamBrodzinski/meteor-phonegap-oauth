@@ -28,7 +28,7 @@ This has been tested with Meteor 0.8.2, accounts-linkedin, Cordova 3.5 and the M
 - Enter email/password and click authorize
 - Meteor should now be logged in
 
-See (this repo)[https://github.com/AdamBrodzinski/meteor-oauth-demo] for a working example
+See [this repo](https://github.com/AdamBrodzinski/meteor-oauth-demo) for a working example
 
 Special thanks to [Zoltan](https://github.com/zol) for the inspiration on this from Meteor-Talk!
 
