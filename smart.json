@@ -3,6 +3,6 @@
   "description": "OAuth for Meteor & PhoneGap ",
   "homepage": "https://github.com/AdamBrodzinski/meteor-phonegap-oauth",
   "author": "Adam Brodzinski (http://blonk.co)",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "git": "https://github.com/AdamBrodzinski/meteor-phonegap-oauth.git"
 }
