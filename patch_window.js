@@ -12,7 +12,8 @@ window.patchWindow = function () {
 
     // Make sure the InAppBrowser is loaded before patching the window.
     try {
-        window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser');
+        // comment out for debugging
+        //window.cordova.require('org.apache.cordova.inappbrowser.inappbrowser');
     } catch (e) {
         return false;
     }
@@ -40,10 +41,14 @@ window.patchWindow = function () {
         closed: true,
 
         open: function (url) {
+            console.log('Open URL', url);
+
             // XXX add options param and append to current options
             oauthWin = __open(url, '_blank', 'location=no,hidden=yes');
 
             oauthWin.addEventListener('loadstop', checkIfOauthIsDone);
+            // nth login will only log on loadstart
+            //oauthWin.addEventListener('loadstart', checkIfOauthIsDone);
 
             // Close the InAppBrowser on exit -- triggered when the
             // user goes back when there are not pages in the history.
@@ -57,15 +62,18 @@ window.patchWindow = function () {
 
                 // remove the listeners
                 oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
+                //oauthWin.removeEventListener('loadstart', checkIfOauthIsDone);
                 oauthWin.removeEventListener('exit', close);
             }
 
             // check if uri contains an error or code param, then manually close popup
             function checkIfOauthIsDone(event) {
+              console.log(event.type + ': ' + event.url);
+
                 // if this is the oauth prompt url, we are not done
                 if (url === event.url) return;
 
-                if (!event.url || !event.url.match(/close|error|code=/)) return;
+                if (!event.url || !event.url.match(/code=/)) return;
 
                 if (event.url.indexOf('credentialToken') > -1) {
                     // Get the credentialToken and credentialSecret from the InAppBrowser's url hash.
@@ -110,3 +118,4 @@ window.patchWindow = function () {
 // Patch the window after cordova is finished loading
 // if the InAppBrowser is not available yet.
 if (!window.patchWindow()) document.addEventListener('deviceready', window.patchWindow, false);
+
