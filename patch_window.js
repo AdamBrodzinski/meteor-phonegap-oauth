@@ -17,20 +17,10 @@ window.patchWindow = function () {
         return false;
     }
 
-    // Plugin messages are not processed on Android until the next
-    // message this prevents the oauthWin event listeners from firing.
-    // Call exec on an interval to force process messages.
-    // http://stackoverflow.com/q/23352940/230462 and
-    // http://stackoverflow.com/a/24319063/230462
-    if (device.platform === 'Android') {
-        setInterval(function () {
-            cordova.exec(null, null, '', '', [])
-        }, 200);
-    }
-
     // Keep a reference to the in app browser's window.open.
     var __open = window.open,
-        oauthWin;
+        oauthWin,
+        checkMessageInterval;
 
     // Create an object to return from a monkeypatched window.open call. Handles
     // open/closed state of popup to keep Meteor happy. Allows one to save window
@@ -51,7 +41,20 @@ window.patchWindow = function () {
 
             oauthWin.show();
 
+            // Plugin messages are not processed on Android until the next
+            // message this prevents the oauthWin event listeners from firing.
+            // Call exec on an interval to force process messages.
+            // http://stackoverflow.com/q/23352940/230462 and
+            // http://stackoverflow.com/a/24319063/230462
+            if (device.platform === 'Android') {
+                checkMessageInterval = setInterval(function () {
+                    cordova.exec(null, null, '', '', [])
+                }, 200);
+            }
+
             function close() {
+                clearTimeout(checkMessageInterval);
+
                 // close the window
                 IAB.close();
 
