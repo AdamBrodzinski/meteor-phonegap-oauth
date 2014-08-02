@@ -25,7 +25,7 @@ var credentialSecretScript = function (token, secret) {
         'try { localStorage["Meteor.oauth."+ credentialToken] = credentialSecret; } catch (err) { }' +
 
         // compatibility with meteor >= 0.8.3
-        'window.opener && window.opener.Package.oauth.OAuth._handleCredentialSecret( credentialToken, credentialSecret);';
+        'try { window.opener && window.opener.Package.oauth.OAuth._handleCredentialSecret( credentialToken, credentialSecret); } catch (err) { }';
 };
 
 // Patch OAuth._endOfLoginResponse to expose the credentialToken and
