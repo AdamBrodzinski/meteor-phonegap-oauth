@@ -17,7 +17,7 @@ window.patchWindow = function () {
         return false;
     }
 
-    // Keep a reference to the in app browser's window.open.
+    // Keep a reference to the original window.open.
     var __open = window.open,
         oauthWin,
         checkMessageInterval;
@@ -88,6 +88,9 @@ window.patchWindow = function () {
 
             this.closed = false;
         },
+
+        // Expose the original window.open.
+        __open: __open,
 
         close: function () {
             if (!oauthWin) return;
