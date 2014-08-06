@@ -68,7 +68,7 @@ window.patchWindow = function () {
                 // if this is the oauth prompt url, we are not done
                 if (url === event.url) return;
 
-                if (!event.url || !event.url.match(/close|error|code=/)) return;
+                if (!event.url || event.url.indexOf('redirect_uri') > -1 || !event.url.match(/close|error|code=/)) return;
 
                 if (event.url.indexOf('credentialToken') > -1) {
                     // Get the credentialToken and credentialSecret from the InAppBrowser's url hash.
