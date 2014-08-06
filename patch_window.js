@@ -30,6 +30,9 @@ window.patchWindow = function () {
         closed: true,
 
         open: function (url) {
+            // Do not allow multiple in app browsers to be open.
+            if (!this.closed) return;
+
             // XXX add options param and append to current options
             oauthWin = __open(url, '_blank', 'location=no,hidden=yes');
 
@@ -55,12 +58,12 @@ window.patchWindow = function () {
             function close() {
                 clearTimeout(checkMessageInterval);
 
-                // close the window
-                IAB.close();
-
                 // remove the listeners
                 oauthWin.removeEventListener('loadstop', checkIfOauthIsDone);
                 oauthWin.removeEventListener('exit', close);
+
+                // close the window
+                IAB.close();
             }
 
             // check if uri contains an error or code param, then manually close popup
@@ -93,11 +96,12 @@ window.patchWindow = function () {
         __open: __open,
 
         close: function () {
-            if (!oauthWin) return;
-
-            oauthWin.close();
-
             this.closed = true;
+
+            if (oauthWin) {
+                oauthWin.close();
+                oauthWin = null;
+            }
         }
     };
 
