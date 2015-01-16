@@ -1,6 +1,7 @@
 meteor-phonegap-oauth
 =====================
 
+## This package is no longer maintained. I'll leave it for legacy code but the new Meteor Cordova + MDG OAuth is the best way to go in the future
 
 Meteor's OAuth flow currently only works with popups. PhoneGap does
 not handle this very well. Using the InAppBrowser plugin we can load the
